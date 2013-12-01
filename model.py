@@ -9,7 +9,8 @@ from datetime import datetime
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = DB_STRING
 app.config['SQLALCHEMY_ECHO'] = True
-app.config['SQLALCHEMY_POOL_RECYCLE'] = 10
+app.config['SQLALCHEMY_POOL_TIMEOUT'] = 30
+app.config['SQLALCHEMY_POOL_RECYCLE'] = 8
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
