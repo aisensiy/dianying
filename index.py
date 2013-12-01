@@ -174,9 +174,8 @@ def apifriends():
         abort(404)
         return 'get friends'
 
-if __name__ == '__main__':
-    if os.environ.get('SERVER_SOFTWARE', None):
-        from bae.core.wsgi import WSGIApplication
-        application = WSGIApplication(app)
-    else:
-        app.run(host='0.0.0.0')
+if os.environ.get('SERVER_SOFTWARE', None):
+    from bae.core.wsgi import WSGIApplication
+    application = WSGIApplication(app)
+else:
+    app.run(host='0.0.0.0')
