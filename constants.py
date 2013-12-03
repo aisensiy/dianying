@@ -24,7 +24,7 @@ dbconfig = {
   }
 }
 (MOVIE_TYPE_PLAYING, MOVIE_TYPE_COMING) = range(2)
-DB_STRING = 'mysql://%s:%s@%s:%s/%s?charset=utf8' % (
+DB_STRING = 'mysql+mysqldb://%s:%s@%s:%s/%s?charset=utf8' % (
     dbconfig[ENV]['user'],
     dbconfig[ENV]['passwd'],
     dbconfig[ENV]['host'],
