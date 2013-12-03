@@ -1,1 +1,1 @@
-echo "$(date)" >> /home/bae/log/bae.log
+echo "$(date)" 2>&1 >> /home/bae/log/bae.log
