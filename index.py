@@ -28,6 +28,10 @@ app.debug = True
 #     content_type='application/json',
 # )
 
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    db.session.close()
+
 @app.errorhandler(404)
 def not_found(error):
     return make_response(jsonify( { 'status': 'error', 'message': 'Not found' } ), 404)
