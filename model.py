@@ -12,7 +12,7 @@ from sqlalchemy.pool import Pool
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = DB_STRING
 app.config['SQLALCHEMY_ECHO'] = True
-app.config['SQLALCHEMY_POOL_RECYCLE'] = -1
+app.config['SQLALCHEMY_POOL_RECYCLE'] = 2
 
 @event.listens_for(Pool, "checkout")
 def check_connection(dbapi_con, con_record, con_proxy):
