@@ -172,7 +172,7 @@ def get_messages(uid1, uid2, limit, offset):
 def apimessages():
     if request.method == 'POST':
         session['user_id'] = 1
-        post_message(session['user_id'], int(request.form['account_id']), request.form['content'])
+        post_message(session['user_id'], int(request.form['user_id']), request.form['content'])
         message = db.session.query(Message).order_by(Message.id.desc()).first()
         return jsonify({
             'status': 'success',
@@ -188,7 +188,7 @@ def apimessages():
         session['user_id'] = 1
         limit = int(request.args.get('limit', 10))
         offset = int(request.args.get('offset', 0))
-        items = get_messages(session['user_id'], int(request.args.get('account_id')), limit, offset)
+        items = get_messages(session['user_id'], int(request.args.get('user_id')), limit, offset)
         return jsonify({
             "status": "success",
             "data": {

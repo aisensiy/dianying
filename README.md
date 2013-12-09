@@ -130,7 +130,7 @@
 
 ### parameters:
 
-* account_id: int
+* user_id: int
 * limit: int
 * offset: int
 
@@ -165,7 +165,7 @@
 
 ### parameters:
 
-* account_id: inte
+* user_id: int
 * content: string
 
 ### return
