@@ -6,7 +6,7 @@ from cors import crossdomain
 from constants import *
 import json
 from helper import *
-from model import User, Message, Movie, db
+from model import User, Message, Movie, db, Account
 
 app = Flask(__name__)
 app.secret_key = r"A0Zr98j/3yX R~XHH!jmN'LWX/,?RT"
@@ -91,8 +91,40 @@ def index():
 @app.route('/auth/login', methods=['POST'])
 @crossdomain(origin='*')
 def authlogin():
-    """docstring for authlogin"""
-    return 'login auth'
+    """
+    If the account is exist, return it.
+    If not, create and return it.
+    """
+    access_token = request.form['access_token']
+    print access_token
+    if not access_token:
+        abort(400)
+    try:
+        token_info = get_token_info(access_token)
+        uid = token_info['uid']
+        account = db.session.query(Account)\
+                  .filter(Account.uid==uid)\
+                  .filter(Account.provider=='weibo').first()
+        user_info = get_user_info(access_token, uid)
+        username = user_info['screen_name']
+
+        if not account:
+            user = User(username=username)
+            user.accounts = [Account(provider='weibo', access_token=access_token, uid=uid)]
+            db.session.add(user)
+            db.session.commit()
+            account = user.accounts[0]
+
+        session['user_id'] = account.user_id
+        session['account_id'] = account.id
+        return jsonify({
+            'user_id': account.user_id,
+            'uid': account.uid
+        })
+
+    except Exception as e:
+        print e
+        abort(400)
 
 def getmovies(movie_type, offset, limit):
     """
