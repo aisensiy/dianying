@@ -42,5 +42,15 @@ class Movie(db.Model):
     param = db.Column(db.Text)
     is_latest = db.Column(TINYINT)
 
+class Account(db.Model):
+    __tablename__ = 'accounts'
+    id = db.Column(db.Integer, primary_key=True)
+    provider = db.Column(db.String(255))
+    uid = db.Column(db.String(255))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    expires_at = db.Column(db.DateTime, default=datetime.utcnow)
+    access_token = db.Column(db.String(255))
+
 if __name__ == '__main__':
     manager.run()
