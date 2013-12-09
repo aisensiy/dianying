@@ -47,7 +47,10 @@ def index():
     #     access_token = session['oauth_token'][0]
     #     resp = weibo.get('statuses/home_timeline.json')
     #     return jsonify(resp.data)
-    return 'it works'
+    resp = make_response(file('README.md').read(), 200)
+    resp.headers['Content-Type'] = 'text/plain'
+    return resp
+
 
 # @app.route('/login')
 # @crossdomain(origin='*')
