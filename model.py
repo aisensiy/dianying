@@ -53,5 +53,13 @@ class Account(db.Model):
     expires_at = db.Column(db.DateTime, default=datetime.utcnow)
     access_token = db.Column(db.String(255))
 
+class Greeting(db.Model):
+    __tablename__ = 'greetings'
+    id = db.Column(db.Integer, primary_key=True)
+    src_user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    dst_user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
 if __name__ == '__main__':
     manager.run()
