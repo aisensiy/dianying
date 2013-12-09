@@ -7,6 +7,23 @@
 * POST  /api/friends
 * POST  /auth/login
 
+## POST /auth/login
+
+如果这个用户是第一次授权连接我们的应用，那么就会为他建立一个新的账号。否则就返回他的账号。其中 `uid` 是微博账号的 `id` 而 `user_id` 是我们为他创建的账号id。在其他地方使用到的 `user_id` 都是指这个账号。
+
+### paramters:
+
+* access_token: string
+
+### return
+
+```
+{
+    "uid": "1313608362",
+    "user_id": 3
+}
+```
+
 ## GET /api/movies/(coming|playing)
 
 ### parameters:
