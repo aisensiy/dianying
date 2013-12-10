@@ -24,7 +24,9 @@ class User(db.Model):
     username = db.Column(db.String(255), unique=True)
     email = db.Column(db.String(255), unique=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    registered_at = db.Column(db.DateTime)
     accounts = db.relationship('Account', backref='user', lazy='dynamic')
+    is_registered = db.Column(db.Boolean, default=False)
 
 class Message(db.Model):
     __tablename__ = 'messages'
@@ -59,7 +61,6 @@ class Greeting(db.Model):
     src_user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     dst_user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
 
 if __name__ == '__main__':
     manager.run()

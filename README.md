@@ -4,7 +4,8 @@
 * GET   /api/messages
 * POST  /api/messages
 * GET   /api/friends
-* POST  /api/friends
+* GET   /api/greetings
+* POST  /api/greetings
 * POST  /auth/login
 
 ## POST /auth/login
@@ -196,6 +197,78 @@
     "id": 14,
     "src_user_id": 1
   },
+  "status": "success"
+}
+```
+
+## GET /api/friends
+
+返回相互打过招呼的好友列表
+
+### parameters:
+
+* limit: int
+* offset: int
+
+### return
+
+```
+{
+  "data": {
+    "items": [
+      {
+        "id": 5,
+        "provider": "weibo",
+        "uid": "123"
+      },
+      {
+        "id": 3,
+        "provider": "weibo",
+        "uid": "1313608362"
+      }
+    ]
+  },
+  "status": "success"
+}
+```
+
+## GET /api/greetings
+
+提供微博 uid 的列表，返回哪些已经打过招呼了。
+
+### parameters:
+
+* weibo: 以逗号分隔的数组 例如 `/api/greetings?weibo=1,2,3`
+
+### return
+
+返回已经打过招呼的 uid 列表
+
+```
+{
+  "data": {
+    "items": {
+      "weibo": [ "123", "456" ]
+    }
+  },
+  "status": "success"
+}
+```
+
+## POST /api/greetings
+
+对某人打招呼，如果返回 `is_friend` 为 `true` 则表示对方已经对这个人打过招呼了
+
+### parameter:
+
+* uid: string
+* provider: string (目前只能是"weibo")
+
+### return
+
+```
+{
+  "is_friend": false,
   "status": "success"
 }
 ```

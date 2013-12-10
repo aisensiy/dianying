@@ -1,12 +1,13 @@
 #-*- coding:utf-8 -*-
 import os
 from flask import Flask, g, request, jsonify, session, url_for, redirect, abort, make_response
+from sqlalchemy.orm import joinedload, aliased
 from flask_oauthlib.client import OAuth
 from cors import crossdomain
 from constants import *
 import json
 from helper import *
-from model import User, Message, Movie, db, Account
+from model import User, Message, Movie, db, Account, Greeting
 
 app = Flask(__name__)
 app.secret_key = r"A0Zr98j/3yX R~XHH!jmN'LWX/,?RT"
@@ -39,6 +40,8 @@ def not_found(error):
 @app.errorhandler(400)
 def bad_request(error):
     return make_response(jsonify( { 'status': 'error', 'message': 'Bad request' } ), 400)
+
+#======================================================================
 
 @app.route('/')
 @crossdomain(origin='*')
@@ -96,10 +99,10 @@ def index():
 def authlogin():
     """
     If the account is exist, return it.
+      If the user is not registered before, add username for it.
     If not, create and return it.
     """
     access_token = request.form['access_token']
-    print access_token
     if not access_token:
         abort(400)
     try:
@@ -111,12 +114,20 @@ def authlogin():
         user_info = get_user_info(access_token, uid)
         username = user_info['screen_name']
 
-        if not account:
-            user = User(username=username)
+        if not account: # if this account not found in db create it and its user
+            user = User(username=username, registered_at=sqlnow())
             user.accounts = [Account(provider='weibo', access_token=access_token, uid=uid)]
             db.session.add(user)
             db.session.commit()
             account = user.accounts[0]
+        else:
+            user = account.user
+            if not user.is_registered: # if this account is created not by the owner, then created it
+                account.username = username
+                user.is_registered = True
+                user.registered_at = sqlnow()
+                db.session.add(user)
+                db.session.commit()
 
         session['user_id'] = account.user_id
         session['account_id'] = account.id
@@ -199,17 +210,96 @@ def apimessages():
             }
         })
 
-@app.route('/api/friends', methods=['GET', 'POST'])
+@app.route('/api/friends', methods=['GET'])
 @crossdomain(origin='*')
 def apifriends():
-    """docstring for apifriends"""
-    if request.method == 'POST':
-        # post_friends
-        return 'post friends'
+    src_user_id = 1
+    try:
+        limit = int(request.args.get('limit', 10))
+        offset = int(request.args.get('offset', 0))
+    except:
+        abort(400)
+    from_table = aliased(Greeting)
+    to_table = aliased(Greeting)
+
+    friends = db.session.query(from_table.dst_user_id, Account.uid, Account.provider)\
+                        .join(to_table, to_table.src_user_id==from_table.dst_user_id)\
+                        .join(Account, Account.user_id==from_table.dst_user_id)\
+                        .filter(from_table.src_user_id==src_user_id)\
+                        .filter(to_table.dst_user_id==from_table.src_user_id)\
+                        .order_by(from_table.created_at.desc())\
+                        .limit(limit).offset(offset).all()
+
+    return jsonify({
+        "status": "success",
+        "data": {
+            "items": [dict(zip(['id', 'uid', 'provider'], [id, uid, provider])) for id, uid, provider in friends]
+        }
+    })
+
+
+@app.route('/api/greetings', methods=['GET', 'POST'])
+@crossdomain(origin='*')
+def apigreetings():
+    src_user_id = 1
+    if request.method == 'POST': # create greeting
+        provider = request.form['provider']
+        uid = request.form['uid']
+
+        if not provider or not uid:
+            abort(400)
+
+        account = db.session.query(Account)\
+                  .filter(Account.uid==uid)\
+                  .filter(Account.provider==provider).first()
+
+        # if the user you are greeting to is not registered in our app then we create
+        # a mock user account for him
+        if not account:
+            user = User()
+            user.accounts = [Account(provider=provider, uid=uid)]
+            db.session.add(user)
+            db.session.commit()
+            account = user.accounts[0]
+
+        greeting = db.session.query(Greeting)\
+                   .filter(Greeting.src_user_id==src_user_id)\
+                   .filter(Greeting.dst_user_id==account.user_id).first()
+
+        if not greeting:
+            greeting = Greeting(src_user_id=src_user_id, dst_user_id=account.user_id)
+            db.session.add(greeting)
+            db.session.commit()
+
+        back_greeting = db.session.query(Greeting)\
+                        .filter(Greeting.src_user_id==account.user_id)\
+                        .filter(Greeting.dst_user_id==src_user_id).first()
+
+        if back_greeting:
+            return jsonify({'status': 'success', 'is_friend': True})
+        else:
+            return jsonify({'status': 'success', 'is_friend': False})
+
     else:
-        # get_friends()
-        abort(404)
-        return 'get friends'
+        try:
+            weibo = request.args.get('weibo').split(',')
+        except:
+            abort(400)
+
+        uids = db.session.query(Account.uid)\
+               .join(Greeting, Greeting.dst_user_id==Account.user_id)\
+               .filter(Greeting.src_user_id==src_user_id)\
+               .filter(Account.uid.in_(weibo)).all()
+
+        return jsonify({
+            'status': 'success',
+            'data': {
+                'items': {
+                    'weibo': [row[0] for row in uids]
+                }
+            }
+        })
+
 
 if os.environ.get('SERVER_SOFTWARE', None):
     from bae.core.wsgi import WSGIApplication
