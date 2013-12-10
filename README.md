@@ -1,4 +1,6 @@
-# APIS
+Go to github for this [README](https://github.com/aisensiy/dianying/blob/master/README.md).
+
+## APIS
 
 * GET   /api/movies/(coming|playing)
 * GET   /api/messages
@@ -39,12 +41,6 @@
   "data": {
     "items": [
       {
-        "aka": [
-          "\u5f15\u529b\u8fb9\u7f18(\u6e2f)",
-          "\u5730\u7403\u5f15\u529b",
-          "\u91cd\u529b",
-          "Gravedad"
-        ],
         "alt": "http://movie.douban.com/subject/3793783/",
         "casts": [
           {
@@ -66,26 +62,6 @@
             },
             "id": "1054433",
             "name": "\u4e54\u6cbb\u00b7\u514b\u9c81\u5c3c"
-          },
-          {
-            "alt": "http://movie.douban.com/celebrity/1048024/",
-            "avatars": {
-              "large": "http://img5.douban.com/img/celebrity/large/277.jpg",
-              "medium": "http://img5.douban.com/img/celebrity/medium/277.jpg",
-              "small": "http://img5.douban.com/img/celebrity/small/277.jpg"
-            },
-            "id": "1048024",
-            "name": "\u827e\u5fb7\u00b7\u54c8\u91cc\u65af"
-          },
-          {
-            "alt": "http://movie.douban.com/celebrity/1335305/",
-            "avatars": {
-              "large": "http://img3.douban.com/pics/celebrity-default-large.gif",
-              "medium": "http://img3.douban.com/pics/celebrity-default-medium.gif",
-              "small": "http://img3.douban.com/pics/celebrity-default-small.gif"
-            },
-            "id": "1335305",
-            "name": "\u5965\u6258\u00b7\u4f0a\u683c\u5185\u4fee\u68ee"
           }
         ],
         "collect_count": 86844,
