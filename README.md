@@ -3,12 +3,26 @@ Go to github for this [README](https://github.com/aisensiy/dianying/blob/master/
 ## APIS
 
 * GET   /api/movies/(coming|playing)
-* GET   /api/messages
-* POST  /api/messages
-* GET   /api/friends
-* GET   /api/greetings
-* POST  /api/greetings
+* GET   /api/messages -- require login
+* POST  /api/messages -- require login
+* GET   /api/friends -- require login
+* GET   /api/greetings -- require login
+* POST  /api/greetings -- require login
 * POST  /auth/login
+
+## 开发模式
+
+在开发模式下，所有需要登录的地方都可以无视。然后所有需要从当前 session 里面去用户 id 的情况都可以传递一个 `src_user_id` 替代之。
+
+例如 `POST /api/greetings` 这个接口可以通过
+
+    curl -d 'uid=123&provider=weibo&src_user_id=1' http://yiqikandianying.duapp.com/api/greetings
+
+搞定
+
+再来一个例子 `POST /api/messages`
+
+    curl -d 'user_id=2&content=bla&src_user_id=1' http://yiqikandianying.duapp.com/api/messages
 
 ## POST /auth/login
 
@@ -193,12 +207,12 @@ Go to github for this [README](https://github.com/aisensiy/dianying/blob/master/
   "data": {
     "items": [
       {
-        "id": 5,
+        "user_id": 5,
         "provider": "weibo",
         "uid": "123"
       },
       {
-        "id": 3,
+        "user_id": 3,
         "provider": "weibo",
         "uid": "1313608362"
       }

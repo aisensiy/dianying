@@ -285,7 +285,7 @@ def apifriends():
     return jsonify({
         "status": "success",
         "data": {
-            "items": [dict(zip(['id', 'uid', 'provider'], [id, uid, provider])) for id, uid, provider in friends]
+            "items": [dict(zip(['user_id', 'uid', 'provider'], [id, uid, provider])) for id, uid, provider in friends]
         }
     })
 
