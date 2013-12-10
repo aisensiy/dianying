@@ -72,7 +72,7 @@ def index():
     #     resp = weibo.get('statuses/home_timeline.json')
     #     return jsonify(resp.data)
     resp = make_response(file('README.md').read(), 200)
-    resp.headers['Content-Type'] = 'text/plain'
+    resp.headers['Content-Type'] = 'text/plain; charset=utf-8'
     return resp
 
 
