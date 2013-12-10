@@ -7,11 +7,12 @@ from cors import crossdomain
 from constants import *
 import json
 from helper import *
+from exception import *
 from model import User, Message, Movie, db, Account, Greeting
+from functools import wraps
 
 app = Flask(__name__)
 app.secret_key = r"A0Zr98j/3yX R~XHH!jmN'LWX/,?RT"
-app.debug = True
 
 # oauth = OAuth(app)
 #
@@ -33,14 +34,34 @@ app.debug = True
 def shutdown_session(exception=None):
     db.session.close()
 
+@app.errorhandler(InvalidParam)
+@app.errorhandler(NoAccess)
+def handle_error(error):
+    response = jsonify(error.to_dict())
+    response.status_code = error.status_code
+    return response
+
 @app.errorhandler(404)
-def not_found(error):
-    return make_response(jsonify( { 'status': 'error', 'message': 'Not found' } ), 404)
+def not_found(error=None):
+    return make_response(jsonify({ 'status': 'error', 'message': 'Not found' }), 404)
 
-@app.errorhandler(400)
-def bad_request(error):
-    return make_response(jsonify( { 'status': 'error', 'message': 'Bad request' } ), 400)
+def require_auth(f):
+    @wraps(f)
+    def decorated(*args, **kvargs):
+        user_id = session['user_id']
+        if not user_id:
+            return jsonify({
+                'status': 'fail',
+                'message': 'not login'
+            })
+        return f(*args, **kvargs)
+    return decorated
 
+# @app.errorhandler(400)
+# def bad_request(error=None):
+#     print error
+#     return make_response(jsonify( { 'status': 'error', 'message': error.message } ), 400)
+#
 #======================================================================
 
 @app.route('/')
@@ -102,9 +123,13 @@ def authlogin():
       If the user is not registered before, add username for it.
     If not, create and return it.
     """
-    access_token = request.form['access_token']
-    if not access_token:
-        abort(400)
+    try:
+        access_token = request.form['access_token']
+        if not access_token:
+            raise InvalidParam('invalid access_token', status_code=400)
+    except Exception as e:
+        raise InvalidParam('invalid access_token', status_code=400)
+
     try:
         token_info = get_token_info(access_token)
         uid = token_info['uid']
@@ -130,15 +155,13 @@ def authlogin():
                 db.session.commit()
 
         session['user_id'] = account.user_id
-        session['account_id'] = account.id
         return jsonify({
             'user_id': account.user_id,
             'uid': account.uid
         })
 
     except Exception as e:
-        print e
-        abort(400)
+        raise InvalidParam(e.message)
 
 def getmovies(movie_type, offset, limit):
     """
@@ -163,7 +186,7 @@ def moviescoming(movie_type):
         limit = int(request.args.get('limit', 10))
         offset = int(request.args.get('offset', 0))
     except:
-        abort(400)
+        raise InvalidParam('limit or offset is not valid')
 
     if movie_type == 'coming':
         return getmovies(MOVIE_TYPE_PLAYING, offset, limit)
@@ -183,10 +206,16 @@ def get_messages(uid1, uid2, limit, offset):
 
 @app.route('/api/messages', methods=['GET', 'POST'])
 @crossdomain(origin='*')
+@require_auth
 def apimessages():
     if request.method == 'POST':
-        session['user_id'] = 1
-        post_message(session['user_id'], int(request.form['user_id']), request.form['content'])
+        try:
+            user_id = int(request.form['user_id'])
+            content = request.form['content']
+        except:
+            raise InvalidParam('invalid user_id or content')
+
+        post_message(session['user_id'], user_id, content)
         message = db.session.query(Message).order_by(Message.id.desc()).first()
         return jsonify({
             'status': 'success',
@@ -199,10 +228,18 @@ def apimessages():
             }
         })
     else:
-        session['user_id'] = 1
-        limit = int(request.args.get('limit', 10))
-        offset = int(request.args.get('offset', 0))
-        items = get_messages(session['user_id'], int(request.args.get('user_id')), limit, offset)
+        try:
+            limit = int(request.args.get('limit', 10))
+            offset = int(request.args.get('offset', 0))
+        except:
+            raise InvalidParam('limit or offset is invalid')
+
+        try:
+            user_id = int(request.args.get('user_id'))
+        except:
+            raise InvalidParam('user_id is invalid')
+
+        items = get_messages(session['user_id'], user_id, limit, offset)
         return jsonify({
             "status": "success",
             "data": {
@@ -212,13 +249,15 @@ def apimessages():
 
 @app.route('/api/friends', methods=['GET'])
 @crossdomain(origin='*')
+@require_auth
 def apifriends():
-    src_user_id = 1
+    src_user_id = session['user_id']
     try:
         limit = int(request.args.get('limit', 10))
         offset = int(request.args.get('offset', 0))
     except:
-        abort(400)
+        raise InvalidParam('limit or offset is not valid')
+
     from_table = aliased(Greeting)
     to_table = aliased(Greeting)
 
@@ -240,14 +279,15 @@ def apifriends():
 
 @app.route('/api/greetings', methods=['GET', 'POST'])
 @crossdomain(origin='*')
+@require_auth
 def apigreetings():
-    src_user_id = 1
+    src_user_id = session['user_id']
     if request.method == 'POST': # create greeting
         provider = request.form['provider']
         uid = request.form['uid']
 
         if not provider or not uid:
-            abort(400)
+            raise InvalidParam('provider or uid is not invalid')
 
         account = db.session.query(Account)\
                   .filter(Account.uid==uid)\
@@ -284,7 +324,7 @@ def apigreetings():
         try:
             weibo = request.args.get('weibo').split(',')
         except:
-            abort(400)
+            raise InvalidParam('weibo params is not valid')
 
         uids = db.session.query(Account.uid)\
                .join(Greeting, Greeting.dst_user_id==Account.user_id)\
@@ -305,4 +345,4 @@ if os.environ.get('SERVER_SOFTWARE', None):
     from bae.core.wsgi import WSGIApplication
     application = WSGIApplication(app)
 else:
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0', debug=True)
