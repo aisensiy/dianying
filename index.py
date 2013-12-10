@@ -204,8 +204,17 @@ def get_messages(uid1, uid2, limit, offset):
 
 @app.route('/api/messages', methods=['GET', 'POST'])
 @crossdomain(origin='*')
-@require_auth
+# @require_auth
 def apimessages():
+    # this is for dev
+    src_user_id = request.args.get('src_user_id')
+    if not src_user_id:
+        src_user_id = request.form.get('src_user_id')
+    if not src_user_id:
+        src_user_id = session.get('src_user_id')
+    if not src_user_id:
+        raise InvalidParam('no src_user_id')
+    # dev end
     if request.method == 'POST':
         try:
             user_id = int(request.form.get('user_id'))
@@ -213,7 +222,7 @@ def apimessages():
         except:
             raise InvalidParam('invalid user_id or content')
 
-        post_message(session['user_id'], user_id, content)
+        post_message(src_user_id, user_id, content)
         message = db.session.query(Message).order_by(Message.id.desc()).first()
         return jsonify({
             'status': 'success',
@@ -237,7 +246,7 @@ def apimessages():
         except:
             raise InvalidParam('user_id is invalid')
 
-        items = get_messages(session['user_id'], user_id, limit, offset)
+        items = get_messages(src_user_id, user_id, limit, offset)
         return jsonify({
             "status": "success",
             "data": {
@@ -247,9 +256,15 @@ def apimessages():
 
 @app.route('/api/friends', methods=['GET'])
 @crossdomain(origin='*')
-@require_auth
+# @require_auth
 def apifriends():
-    src_user_id = session['user_id']
+    # this is for dev
+    src_user_id = request.args.get('src_user_id')
+    if not src_user_id:
+        src_user_id = session.get('user_id')
+    if not src_user_id:
+        raise InvalidParam('no src_user_id')
+    # dev end
     try:
         limit = int(request.args.get('limit', 10))
         offset = int(request.args.get('offset', 0))
@@ -277,9 +292,17 @@ def apifriends():
 
 @app.route('/api/greetings', methods=['GET', 'POST'])
 @crossdomain(origin='*')
-@require_auth
+# @require_auth
 def apigreetings():
-    src_user_id = session['user_id']
+    # this is for dev
+    src_user_id = request.args.get('src_user_id')
+    if not src_user_id:
+        src_user_id = request.form.get('src_user_id')
+    if not src_user_id:
+        src_user_id = session.get('src_user_id')
+    if not src_user_id:
+        raise InvalidParam('no src_user_id')
+    # dev end
     if request.method == 'POST': # create greeting
         provider = request.form.get('provider')
         uid = request.form.get('uid')
