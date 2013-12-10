@@ -48,7 +48,7 @@ def not_found(error=None):
 def require_auth(f):
     @wraps(f)
     def decorated(*args, **kvargs):
-        user_id = session['user_id']
+        user_id = session.get('user_id')
         if not user_id:
             return jsonify({
                 'status': 'fail',
@@ -124,9 +124,7 @@ def authlogin():
     If not, create and return it.
     """
     try:
-        access_token = request.form['access_token']
-        if not access_token:
-            raise InvalidParam('invalid access_token', status_code=400)
+        access_token = request.form.get('access_token')
     except Exception as e:
         raise InvalidParam('invalid access_token', status_code=400)
 
@@ -210,7 +208,7 @@ def get_messages(uid1, uid2, limit, offset):
 def apimessages():
     if request.method == 'POST':
         try:
-            user_id = int(request.form['user_id'])
+            user_id = int(request.form.get('user_id'))
             content = request.form['content']
         except:
             raise InvalidParam('invalid user_id or content')
@@ -283,8 +281,8 @@ def apifriends():
 def apigreetings():
     src_user_id = session['user_id']
     if request.method == 'POST': # create greeting
-        provider = request.form['provider']
-        uid = request.form['uid']
+        provider = request.form.get('provider')
+        uid = request.form.get('uid')
 
         if not provider or not uid:
             raise InvalidParam('provider or uid is not invalid')
