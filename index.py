@@ -337,9 +337,9 @@ def apigreetings():
                         .filter(Greeting.dst_user_id==src_user_id).first()
 
         if back_greeting:
-            return jsonify({'status': 'success', 'is_friend': True})
+            return jsonify({'status': 'success', 'is_friend': True, 'user_id': account.user_id})
         else:
-            return jsonify({'status': 'success', 'is_friend': False})
+            return jsonify({'status': 'success', 'is_friend': False, 'user_id': account.user_id})
 
     else:
         try:
