@@ -24,6 +24,8 @@ Go to github for this [README](https://github.com/aisensiy/dianying/blob/master/
 
     curl -d 'user_id=2&content=bla&src_user_id=1' http://yiqikandianying.duapp.com/api/messages
 
+还有，很多地方都用到了 `user_id`，但是做客户端开发的同学未必有查看数据库的权限，所以没办法知道这个 `user_id` 那做的时候呢可以通过 `POST /api/greetings` 这个接口搞定。因为这个接口的策略是 *如果你打招呼的这个人还没有注册，那么就会给它生成一个账号* 因此这个请求会给你返回这个用户的 `user_id` 的。那么这样你就可以自己创建一些账号做测试了。
+
 ## POST /auth/login
 
 如果这个用户是第一次授权连接我们的应用，那么就会为他建立一个新的账号。否则就返回他的账号。其中 `uid` 是微博账号的 `id` 而 `user_id` 是我们为他创建的账号id。在其他地方使用到的 `user_id` 都是指这个账号。
@@ -259,6 +261,7 @@ Go to github for this [README](https://github.com/aisensiy/dianying/blob/master/
 ```
 {
   "is_friend": false,
-  "status": "success"
+  "status": "success",
+  "user_id": 123
 }
 ```
