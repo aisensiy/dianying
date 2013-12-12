@@ -155,8 +155,11 @@ def authlogin():
 
         session['user_id'] = account.user_id
         return jsonify({
-            'user_id': account.user_id,
-            'uid': account.uid
+            'status': 'success',
+            'data': {
+                'user_id': account.user_id,
+                'uid': account.uid
+            }
         })
 
     except Exception as e:
@@ -324,9 +327,21 @@ def post_greeting(request, db, src_user_id):
                     .filter(Greeting.dst_user_id==src_user_id).first()
 
     if back_greeting:
-        return jsonify({'status': 'success', 'is_friend': True, 'user_id': account.user_id})
+        return jsonify({
+            'status': 'success',
+            'data': {
+                'is_friend': True,
+                'user_id': account.user_id
+            }
+        })
     else:
-        return jsonify({'status': 'success', 'is_friend': False, 'user_id': account.user_id})
+        return jsonify({
+            'status': 'success',
+            'data': {
+                'is_friend': False,
+                'user_id': account.user_id
+            }
+        })
 
 def get_greeting(request, db, src_user_id):
     ts = int(request.args.get('timestamp', 1))

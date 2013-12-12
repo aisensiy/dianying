@@ -38,8 +38,11 @@ Go to github for this [README](https://github.com/aisensiy/dianying/blob/master/
 
 ```
 {
+  "status": "success",
+  "data": {
     "uid": "1313608362",
     "user_id": 3
+  }
 }
 ```
 
@@ -261,8 +264,10 @@ Go to github for this [README](https://github.com/aisensiy/dianying/blob/master/
 
 ```
 {
-  "is_friend": false,
   "status": "success",
-  "user_id": 123
+  "data": {
+    "is_friend": false,
+    "user_id": 123
+  }
 }
 ```
