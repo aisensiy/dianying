@@ -226,11 +226,11 @@ Go to github for this [README](https://github.com/aisensiy/dianying/blob/master/
 
 ## GET /api/greetings
 
-提供微博 uid 的列表，返回哪些已经打过招呼了。
+返回已经打过招呼了的 uid。
 
 ### parameters:
 
-* weibo: 以逗号分隔的数组 例如 `/api/greetings?weibo=1,2,3`
+* timestamp: 返回时间戳大于 `timestamp` 的打招呼的内容。
 
 ### return
 
@@ -239,9 +239,10 @@ Go to github for this [README](https://github.com/aisensiy/dianying/blob/master/
 ```
 {
   "data": {
-    "items": {
-      "weibo": [ "123", "456" ]
-    }
+    "items": [
+      "123",
+      "1234609293"
+    ]
   },
   "status": "success"
 }

@@ -10,6 +10,7 @@ from helper import *
 from exception import *
 from model import User, Message, Movie, db, Account, Greeting
 from functools import wraps
+from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = r"A0Zr98j/3yX R~XHH!jmN'LWX/,?RT"
@@ -289,6 +290,61 @@ def apifriends():
         }
     })
 
+def post_greeting(request, db, src_user_id):
+    provider = request.form.get('provider')
+    uid = request.form.get('uid')
+
+    if not provider or not uid:
+        raise InvalidParam('provider or uid is not invalid')
+
+    account = db.session.query(Account)\
+              .filter(Account.uid==uid)\
+              .filter(Account.provider==provider).first()
+
+    # if the user you are greeting to is not registered in our app then we create
+    # a mock user account for him
+    if not account:
+        user = User()
+        user.accounts = [Account(provider=provider, uid=uid)]
+        db.session.add(user)
+        db.session.commit()
+        account = user.accounts[0]
+
+    greeting = db.session.query(Greeting)\
+               .filter(Greeting.src_user_id==src_user_id)\
+               .filter(Greeting.dst_user_id==account.user_id).first()
+
+    if not greeting:
+        greeting = Greeting(src_user_id=src_user_id, dst_user_id=account.user_id)
+        db.session.add(greeting)
+        db.session.commit()
+
+    back_greeting = db.session.query(Greeting)\
+                    .filter(Greeting.src_user_id==account.user_id)\
+                    .filter(Greeting.dst_user_id==src_user_id).first()
+
+    if back_greeting:
+        return jsonify({'status': 'success', 'is_friend': True, 'user_id': account.user_id})
+    else:
+        return jsonify({'status': 'success', 'is_friend': False, 'user_id': account.user_id})
+
+def get_greeting(request, db, src_user_id):
+    ts = int(request.args.get('timestamp', 1))
+    if not ts:
+        raise InvalidParam('invalid timestamp')
+
+    uids = db.session.query(Account.uid)\
+           .join(Greeting, Greeting.dst_user_id==Account.user_id)\
+           .filter(Greeting.src_user_id==src_user_id)\
+           .filter(Greeting.created_at > datetime.fromtimestamp(ts)).all()
+
+    return jsonify({
+        'status': 'success',
+        'data': {
+            'items': [row[0] for row in uids]
+        }
+    })
+
 
 @app.route('/api/greetings', methods=['GET', 'POST'])
 @crossdomain(origin='*')
@@ -304,62 +360,9 @@ def apigreetings():
         raise InvalidParam('no src_user_id')
     # dev end
     if request.method == 'POST': # create greeting
-        provider = request.form.get('provider')
-        uid = request.form.get('uid')
-
-        if not provider or not uid:
-            raise InvalidParam('provider or uid is not invalid')
-
-        account = db.session.query(Account)\
-                  .filter(Account.uid==uid)\
-                  .filter(Account.provider==provider).first()
-
-        # if the user you are greeting to is not registered in our app then we create
-        # a mock user account for him
-        if not account:
-            user = User()
-            user.accounts = [Account(provider=provider, uid=uid)]
-            db.session.add(user)
-            db.session.commit()
-            account = user.accounts[0]
-
-        greeting = db.session.query(Greeting)\
-                   .filter(Greeting.src_user_id==src_user_id)\
-                   .filter(Greeting.dst_user_id==account.user_id).first()
-
-        if not greeting:
-            greeting = Greeting(src_user_id=src_user_id, dst_user_id=account.user_id)
-            db.session.add(greeting)
-            db.session.commit()
-
-        back_greeting = db.session.query(Greeting)\
-                        .filter(Greeting.src_user_id==account.user_id)\
-                        .filter(Greeting.dst_user_id==src_user_id).first()
-
-        if back_greeting:
-            return jsonify({'status': 'success', 'is_friend': True, 'user_id': account.user_id})
-        else:
-            return jsonify({'status': 'success', 'is_friend': False, 'user_id': account.user_id})
-
+        return post_greeting(request, db, src_user_id)
     else:
-        try:
-            weibo = request.args.get('weibo').split(',')
-        except:
-            raise InvalidParam('weibo params is not valid')
-
-        uids = db.session.query(Account.uid)\
-               .join(Greeting, Greeting.dst_user_id==Account.user_id)\
-               .filter(Greeting.src_user_id==src_user_id)\
-               .filter(Account.uid.in_(weibo)).all()
-
-        return jsonify({
-            'status': 'success',
-            'data': {
-                'items': {
-                    'weibo': [row[0] for row in uids]
-                }
-            }
-        })
+        return get_greeting(request, db, src_user_id)
 
 
 if os.environ.get('SERVER_SOFTWARE', None):
