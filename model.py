@@ -26,6 +26,7 @@ class User(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     registered_at = db.Column(db.DateTime)
     accounts = db.relationship('Account', backref='user', lazy='dynamic')
+    friends = db.relationship('Friend', foreign_keys='Friend.user_id')
     is_registered = db.Column(db.Boolean, default=False)
 
 class Message(db.Model):
@@ -50,7 +51,7 @@ class Account(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     provider = db.Column(db.String(255))
     uid = db.Column(db.String(255))
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), )
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     expires_at = db.Column(db.DateTime, default=datetime.utcnow)
     access_token = db.Column(db.String(255))
@@ -60,6 +61,13 @@ class Greeting(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     src_user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     dst_user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class Friend(db.Model):
+    __tablename__ = 'friends'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    friend_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 if __name__ == '__main__':

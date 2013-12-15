@@ -8,7 +8,7 @@ from constants import *
 import json
 from helper import *
 from exception import *
-from model import User, Message, Movie, db, Account, Greeting
+from model import User, Message, Movie, db, Account, Greeting, Friend
 from functools import wraps
 from datetime import datetime
 
@@ -269,27 +269,24 @@ def apifriends():
     if not src_user_id:
         raise InvalidParam('no src_user_id')
     # dev end
-    try:
-        limit = int(request.args.get('limit', 10))
-        offset = int(request.args.get('offset', 0))
-    except:
-        raise InvalidParam('limit or offset is not valid')
+
+    ts = int(request.args.get('timestamp', 1))
+    if not ts:
+        raise InvalidParam('invalid timestamp')
 
     from_table = aliased(Greeting)
     to_table = aliased(Greeting)
 
-    friends = db.session.query(from_table.dst_user_id, Account.uid, Account.provider)\
-                        .join(to_table, to_table.src_user_id==from_table.dst_user_id)\
-                        .join(Account, Account.user_id==from_table.dst_user_id)\
-                        .filter(from_table.src_user_id==src_user_id)\
-                        .filter(to_table.dst_user_id==from_table.src_user_id)\
-                        .order_by(from_table.created_at.desc())\
-                        .limit(limit).offset(offset).all()
+    friends = db.session.query(Friend.friend_id, Account.uid, Account.provider, Friend.created_at)\
+                        .join(Account, Account.user_id == Friend.friend_id)\
+                        .filter(Friend.user_id == src_user_id)\
+                        .filter(Friend.created_at >= ts).all()
 
     return jsonify({
         "status": "success",
         "data": {
-            "items": [dict(zip(['user_id', 'uid', 'provider'], [id, uid, provider])) for id, uid, provider in friends]
+            "items": [dict(zip(['user_id', 'uid', 'provider', 'created_at'], [id, uid, provider, created_at]))
+                for id, uid, provider, created_at in friends]
         }
     })
 
@@ -327,6 +324,10 @@ def post_greeting(request, db, src_user_id):
                     .filter(Greeting.dst_user_id==src_user_id).first()
 
     if back_greeting:
+        db.session.add(Friend(user_id=account.user_id, friend_id=src_user_id))
+        db.session.add(Friend(user_id=src_user_id, friend_id=account.user_id))
+        db.session.commit()
+
         return jsonify({
             'status': 'success',
             'data': {
@@ -348,7 +349,7 @@ def get_greeting(request, db, src_user_id):
     if not ts:
         raise InvalidParam('invalid timestamp')
 
-    uids = db.session.query(Account.uid)\
+    rows = db.session.query(Account.uid, Greeting.created_at, Account.user_id)\
            .join(Greeting, Greeting.dst_user_id==Account.user_id)\
            .filter(Greeting.src_user_id==src_user_id)\
            .filter(Greeting.created_at > datetime.fromtimestamp(ts)).all()
@@ -356,7 +357,8 @@ def get_greeting(request, db, src_user_id):
     return jsonify({
         'status': 'success',
         'data': {
-            'items': [row[0] for row in uids]
+            'items': [dict(zip(['uid', 'created_at', 'user_id'], [uid, created_at, user_id]))
+                for uid, created_at, user_id in rows]
         }
     })
 
