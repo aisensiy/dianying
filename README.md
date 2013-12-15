@@ -202,8 +202,7 @@ Go to github for this [README](https://github.com/aisensiy/dianying/blob/master/
 
 ### parameters:
 
-* limit: int
-* offset: int
+* timestamp: 返回时间戳大于 `timestamp` 的好友。
 
 ### return
 
@@ -212,14 +211,10 @@ Go to github for this [README](https://github.com/aisensiy/dianying/blob/master/
   "data": {
     "items": [
       {
-        "user_id": 5,
+        "created_at": "Sun, 15 Dec 2013 11:22:10 GMT",
         "provider": "weibo",
-        "uid": "123"
-      },
-      {
-        "user_id": 3,
-        "provider": "weibo",
-        "uid": "1313608362"
+        "uid": "1313608362",
+        "user_id": 3
       }
     ]
   },
@@ -243,8 +238,16 @@ Go to github for this [README](https://github.com/aisensiy/dianying/blob/master/
 {
   "data": {
     "items": [
-      "123",
-      "1234609293"
+      {
+        "created_at": "Mon, 09 Dec 2013 17:27:41 GMT",
+        "uid": "123",
+        "user_id": 5
+      },
+      {
+        "created_at": "Tue, 10 Dec 2013 09:34:44 GMT",
+        "uid": "1234609293",
+        "user_id": 6
+      }
     ]
   },
   "status": "success"
