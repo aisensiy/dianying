@@ -2,9 +2,18 @@ import time
 import urllib2
 import urllib
 import json
+import datetime
 
 def sqlnow():
-  return time.strftime('%Y-%m-%d %H:%M:%S')
+    return time.strftime('%Y-%m-%d %H:%M:%S')
+
+def unix_time(dt):
+    epoch = datetime.datetime.utcfromtimestamp(0)
+    delta = dt - epoch
+    return delta.total_seconds()
+
+def totimestamp(dt):
+    return unix_time(dt) * 1000
 
 class APIError(StandardError):
     '''

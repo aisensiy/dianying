@@ -202,7 +202,7 @@ def post_message(src_user_id, dst_user_id, content):
 
 def get_messages(uid1, uid2, limit, offset):
     rows = db.session.query(Message.id, Message.content, Message.created_at).filter(Message.src_user_id.in_([uid1, uid2])).filter(Message.dst_user_id.in_([uid1, uid2])).order_by(Message.id.desc()).offset(offset).limit(limit)
-    items = [dict(zip(['id', 'content', 'created_at'], [id, content, created_at])) for id, content, created_at in rows]
+    items = [dict(zip(['id', 'content', 'created_at'], [id, content, totimestamp(created_at)])) for id, content, created_at in rows]
     items.reverse()
     return items
 
@@ -235,7 +235,7 @@ def apimessages():
                 'src_user_id': message.src_user_id,
                 'dst_user_id': message.dst_user_id,
                 'content': message.content,
-                'created_at': message.created_at
+                'created_at': totimestamp(message.created_at)
             }
         })
     else:
@@ -285,7 +285,7 @@ def apifriends():
     return jsonify({
         "status": "success",
         "data": {
-            "items": [dict(zip(['user_id', 'uid', 'provider', 'created_at'], [id, uid, provider, created_at]))
+            "items": [dict(zip(['user_id', 'uid', 'provider', 'created_at'], [id, uid, provider, totimestamp(created_at)]))
                 for id, uid, provider, created_at in friends]
         }
     })
@@ -357,7 +357,7 @@ def get_greeting(request, db, src_user_id):
     return jsonify({
         'status': 'success',
         'data': {
-            'items': [dict(zip(['uid', 'created_at', 'user_id'], [uid, created_at, user_id]))
+            'items': [dict(zip(['uid', 'created_at', 'user_id'], [uid, totimestamp(created_at), user_id]))
                 for uid, created_at, user_id in rows]
         }
     })
