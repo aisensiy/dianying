@@ -154,18 +154,21 @@ Go to github for this [README](https://github.com/aisensiy/dianying/blob/master/
   "data": {
     "items": [
       {
+      	"user_id": 1,
         "content": "test",
-        "created_at": "Fri, 29 Nov 2013 18:50:44 GMT",
+        "created_at": 1387348724306
         "id": 7
       },
       {
+      	"user_id": 2,
         "content": "test",
-        "created_at": "Fri, 29 Nov 2013 18:50:46 GMT",
+        "created_at": 1387348724306
         "id": 8
       },
       {
+      	"user_id": 1,
         "content": "test",
-        "created_at": "Sat, 30 Nov 2013 02:56:13 GMT",
+        "created_at": 1387348724306
         "id": 9
       }
     ]
@@ -186,11 +189,11 @@ Go to github for this [README](https://github.com/aisensiy/dianying/blob/master/
 ```
 {
   "data": {
-    "content": "test",
-    "created_at": "Sat, 30 Nov 2013 04:43:01 GMT",
-    "dst_user_id": 1,
     "id": 14,
-    "src_user_id": 1
+    "src_user_id": 1,
+    "dst_user_id": 1,
+    "content": "test",
+    "created_at": 1387348804000
   },
   "status": "success"
 }
@@ -211,7 +214,7 @@ Go to github for this [README](https://github.com/aisensiy/dianying/blob/master/
   "data": {
     "items": [
       {
-        "created_at": "Sun, 15 Dec 2013 11:22:10 GMT",
+        "created_at": 1387348804000,
         "provider": "weibo",
         "uid": "1313608362",
         "user_id": 3
@@ -239,12 +242,12 @@ Go to github for this [README](https://github.com/aisensiy/dianying/blob/master/
   "data": {
     "items": [
       {
-        "created_at": "Mon, 09 Dec 2013 17:27:41 GMT",
+        "created_at": 1387348804000,
         "uid": "123",
         "user_id": 5
       },
       {
-        "created_at": "Tue, 10 Dec 2013 09:34:44 GMT",
+        "created_at": 1387348812000,
         "uid": "1234609293",
         "user_id": 6
       }
