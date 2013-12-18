@@ -201,8 +201,12 @@ def post_message(src_user_id, dst_user_id, content):
     db.session.commit()
 
 def get_messages(uid1, uid2, limit, offset):
-    rows = db.session.query(Message.id, Message.content, Message.created_at).filter(Message.src_user_id.in_([uid1, uid2])).filter(Message.dst_user_id.in_([uid1, uid2])).order_by(Message.id.desc()).offset(offset).limit(limit)
-    items = [dict(zip(['id', 'content', 'created_at'], [id, content, totimestamp(created_at)])) for id, content, created_at in rows]
+    rows = db.session.query(Message.src_user_id, Message.id, Message.content, Message.created_at)\
+            .filter(Message.src_user_id.in_([uid1, uid2]))\
+            .filter(Message.dst_user_id.in_([uid1, uid2]))\
+            .order_by(Message.id.desc()).offset(offset).limit(limit)
+    items = [dict(zip(['user_id', 'id', 'content', 'created_at'], [user_id, id, content, totimestamp(created_at)]))
+            for user_id, id, content, created_at in rows]
     items.reverse()
     return items
 
