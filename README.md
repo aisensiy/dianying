@@ -154,19 +154,19 @@ Go to github for this [README](https://github.com/aisensiy/dianying/blob/master/
   "data": {
     "items": [
       {
-      	"user_id": 1,
+        "uid": "123",
         "content": "test",
         "created_at": 1387348724306
         "id": 7
       },
       {
-      	"user_id": 2,
+        "uid": "123",
         "content": "test",
         "created_at": 1387348724306
         "id": 8
       },
       {
-      	"user_id": 1,
+        "uid": "471231231",
         "content": "test",
         "created_at": 1387348724306
         "id": 9
