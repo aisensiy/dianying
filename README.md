@@ -205,7 +205,7 @@ Go to github for this [README](https://github.com/aisensiy/dianying/blob/master/
 
 ### parameters:
 
-* timestamp: 返回时间戳大于 `timestamp` 的好友。
+* lastid: 返回时间戳大于 `lastid` 的好友。
 
 ### return
 
@@ -214,6 +214,7 @@ Go to github for this [README](https://github.com/aisensiy/dianying/blob/master/
   "data": {
     "items": [
       {
+        "id": 4,
         "created_at": 1387348804000,
         "provider": "weibo",
         "uid": "1313608362",
@@ -231,7 +232,7 @@ Go to github for this [README](https://github.com/aisensiy/dianying/blob/master/
 
 ### parameters:
 
-* timestamp: 返回时间戳大于 `timestamp` 的打招呼的内容。
+* lastid: 返回时间戳大于 `lastid` 的打招呼的内容。
 
 ### return
 
@@ -242,11 +243,13 @@ Go to github for this [README](https://github.com/aisensiy/dianying/blob/master/
   "data": {
     "items": [
       {
+        "lastid": 5,
         "created_at": 1387348804000,
         "uid": "123",
         "user_id": 5
       },
       {
+        "lastid": 6,
         "created_at": 1387348812000,
         "uid": "1234609293",
         "user_id": 6

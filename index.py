@@ -277,23 +277,24 @@ def apifriends():
         raise InvalidParam('no src_user_id')
     # dev end
 
-    ts = int(request.args.get('timestamp', 1))
-    if not ts:
-        raise InvalidParam('invalid timestamp')
+    try:
+        lastid = int(request.args.get('lastid', 0))
+    except:
+        raise InvalidParam('invalid lastid')
 
     from_table = aliased(Greeting)
     to_table = aliased(Greeting)
 
-    friends = db.session.query(Friend.friend_id, Account.uid, Account.provider, Friend.created_at)\
+    friends = db.session.query(Friend.id, Friend.friend_id, Account.uid, Account.provider, Friend.created_at)\
                         .join(Account, Account.user_id == Friend.friend_id)\
                         .filter(Friend.user_id == src_user_id)\
-                        .filter(Friend.created_at >= ts).all()
+                        .filter(Friend.id > lastid).all()
 
     return jsonify({
         "status": "success",
         "data": {
-            "items": [dict(zip(['user_id', 'uid', 'provider', 'created_at'], [id, uid, provider, totimestamp(created_at)]))
-                for id, uid, provider, created_at in friends]
+            "items": [dict(zip(['id', 'user_id', 'uid', 'provider', 'created_at'], [id, user_id, uid, provider, totimestamp(created_at)]))
+                for id, user_id, uid, provider, created_at in friends]
         }
     })
 
@@ -352,20 +353,21 @@ def post_greeting(request, db, src_user_id):
         })
 
 def get_greeting(request, db, src_user_id):
-    ts = int(request.args.get('timestamp', 1))
-    if not ts:
-        raise InvalidParam('invalid timestamp')
+    try:
+        lastid = int(request.args.get('lastid', 0))
+    except:
+        raise InvalidParam('invalid lastid')
 
-    rows = db.session.query(Account.uid, Greeting.created_at, Account.user_id)\
+    rows = db.session.query(Account.uid, Greeting.id, Greeting.created_at, Account.user_id)\
            .join(Greeting, Greeting.dst_user_id==Account.user_id)\
            .filter(Greeting.src_user_id==src_user_id)\
-           .filter(Greeting.created_at > datetime.fromtimestamp(ts)).all()
+           .filter(Greeting.id > lastid).all()
 
     return jsonify({
         'status': 'success',
         'data': {
-            'items': [dict(zip(['uid', 'created_at', 'user_id'], [uid, totimestamp(created_at), user_id]))
-                for uid, created_at, user_id in rows]
+            'items': [dict(zip(['uid', 'id', 'created_at', 'user_id'], [uid, id, totimestamp(created_at), user_id]))
+                for uid, id, created_at, user_id in rows]
         }
     })
 
