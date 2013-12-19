@@ -62,11 +62,6 @@ def require_auth(f):
         return f(*args, **kvargs)
     return decorated
 
-# @app.errorhandler(400)
-# def bad_request(error=None):
-#     print error
-#     return make_response(jsonify( { 'status': 'error', 'message': error.message } ), 400)
-#
 #======================================================================
 
 @app.route('/')
