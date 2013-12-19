@@ -31,6 +31,10 @@ app.secret_key = r"A0Zr98j/3yX R~XHH!jmN'LWX/,?RT"
 #     content_type='application/json',
 # )
 
+@app.before_request
+def before_request():
+    session.permanent = True
+
 @app.teardown_appcontext
 def shutdown_session(exception=None):
     db.session.close()
