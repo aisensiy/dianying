@@ -6,7 +6,6 @@ from sqlalchemy.dialects.mysql import TINYINT
 from constants import *
 from datetime import datetime
 
-
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = DB_STRING
 app.config['SQLALCHEMY_ECHO'] = True
