@@ -31,9 +31,9 @@ app.secret_key = r"A0Zr98j/3yX R~XHH!jmN'LWX/,?RT"
 #     content_type='application/json',
 # )
 
-@app.before_request
-def before_request():
-    session.permanent = True
+# @app.before_request
+# def before_request():
+#     session.permanent = True
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):
@@ -152,6 +152,7 @@ def authlogin():
                 db.session.add(user)
                 db.session.commit()
 
+        session.permanent = True
         session['user_id'] = account.user_id
         return jsonify({
             'status': 'success',
@@ -168,8 +169,6 @@ def getmovies(movie_type, offset, limit):
     """
     Return movie list
     """
-    print 'run get movies'
-    print '=' * 20
     rows = db.session.query(Movie.param).filter(Movie.type==movie_type).filter(Movie.is_latest==1).limit(limit).offset(offset)
     items = [json.loads(r.param) for r in rows]
 

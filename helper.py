@@ -3,6 +3,7 @@ import urllib2
 import urllib
 import json
 import datetime
+from constants import APPKEY
 
 def sqlnow():
     return time.strftime('%Y-%m-%d %H:%M:%S')
@@ -79,6 +80,6 @@ def get_token_info(access_token):
 
 def get_user_info(access_token, uid):
     url = 'https://api.weibo.com/2/users/show.json'
-    data = urllib.urlencode({'access_token': access_token, 'uid': uid})
+    data = urllib.urlencode({'access_token': access_token, 'uid': uid, 'source': APPKEY})
     return _get_weibo_api_call(url, data=data)
 
