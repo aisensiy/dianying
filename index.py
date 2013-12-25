@@ -17,26 +17,6 @@ app = Flask(__name__)
 app.secret_key = r"A0Zr98j/3yX R~XHH!jmN'LWX/,?RT"
 app.session_interface = ItsdangerousSessionInterface()
 
-# oauth = OAuth(app)
-#
-# weibo = oauth.remote_app(
-#     'weibo',
-#     consumer_key='1361202271',
-#     consumer_secret='4a23560f987896b762f4ec6ddc9fb3f4',
-#     request_token_params={'scope': 'email,statuses_to_me_read'},
-#     base_url='https://api.weibo.com/2/',
-#     authorize_url='https://api.weibo.com/oauth2/authorize',
-#     request_token_url=None,
-#     access_token_method='POST',
-#     access_token_url='https://api.weibo.com/oauth2/access_token',
-#     # since weibo's response is a shit, we need to force parse the content
-#     content_type='application/json',
-# )
-
-# @app.before_request
-# def before_request():
-#     session.permanent = True
-
 @app.teardown_appcontext
 def shutdown_session(exception=None):
     db.session.close()
@@ -69,53 +49,10 @@ def require_auth(f):
 @app.route('/')
 @crossdomain(origin='*')
 def index():
-    # if 'oauth_token' in session:
-    #     access_token = session['oauth_token'][0]
-    #     resp = weibo.get('statuses/home_timeline.json')
-    #     return jsonify(resp.data)
     resp = make_response(file('README.md').read(), 200)
     resp.headers['Content-Type'] = 'text/plain; charset=utf-8'
     return resp
 
-
-# @app.route('/login')
-# @crossdomain(origin='*')
-# def login():
-#     return weibo.authorize(callback=url_for('authorized', next=request.args.get('next') or request.referrer or None, _external=True))
-#
-# @app.route('/logout')
-# @crossdomain(origin='*')
-# def logout():
-#     session.pop('oauth_token', None)
-#     return redirect(url_for('index'))
-
-# @app.route('/login/authorized')
-# @weibo.authorized_handler
-# @crossdomain(origin='*')
-# def authorized(resp):
-#     if resp is None:
-#         return 'Access denied: reason=%s error=%s' % (
-#             request.args['error_reason'],
-#             request.args['error_description']
-#         ), 403
-#     session['oauth_token'] = resp['access_token']
-#     user = UserAccount(db).find_or_create_user(resp['uid'], session['oauth_token'])
-#     return jsonify(user)
-
-# @weibo.tokengetter
-# def get_weibo_oauth_token():
-#     return session.get('oauth_token')
-#
-# def change_weibo_header(uri, headers, body):
-#     """Since weibo is a rubbish server, it does not follow the standard,
-#     we need to change the authorization header for it."""
-#     auth = headers.get('Authorization')
-#     if auth:
-#         auth = auth.replace('Bearer', 'OAuth2')
-#         headers['Authorization'] = auth
-#     return uri, headers, body
-#
-# weibo.pre_request = change_weibo_header
 
 @app.route('/auth/login', methods=['POST'])
 @crossdomain(origin='*')
