@@ -148,7 +148,7 @@ def get_messages(uid1, uid2, limit, offset):
 
 @app.route('/api/messages', methods=['GET', 'POST'])
 @crossdomain(origin='*')
-# @require_auth
+@require_auth
 def apimessages():
     # this is for dev
     src_user_id = request.args.get('src_user_id')
@@ -201,7 +201,7 @@ def apimessages():
 
 @app.route('/api/friends', methods=['GET'])
 @crossdomain(origin='*')
-# @require_auth
+@require_auth
 def apifriends():
     # this is for dev
     src_user_id = request.args.get('src_user_id')
@@ -308,7 +308,7 @@ def get_greeting(request, db, src_user_id):
 
 @app.route('/api/greetings', methods=['GET', 'POST'])
 @crossdomain(origin='*')
-# @require_auth
+@require_auth
 def apigreetings():
     # this is for dev
     src_user_id = request.args.get('src_user_id')
