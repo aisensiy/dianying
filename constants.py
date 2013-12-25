@@ -31,5 +31,3 @@ DB_STRING = 'mysql+mysqldb://%s:%s@%s:%s/%s?charset=utf8' % (
     dbconfig[ENV]['port'],
     dbconfig[ENV]['db']
 )
-
-APPKEY = '1361202271'

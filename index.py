@@ -11,9 +11,11 @@ from exception import *
 from model import User, Message, Movie, db, Account, Greeting, Friend
 from functools import wraps
 from datetime import datetime
+from better_session import ItsdangerousSessionInterface
 
 app = Flask(__name__)
 app.secret_key = r"A0Zr98j/3yX R~XHH!jmN'LWX/,?RT"
+app.session_interface = ItsdangerousSessionInterface()
 
 # oauth = OAuth(app)
 #
@@ -131,10 +133,11 @@ def authlogin():
     try:
         token_info = get_token_info(access_token)
         uid = token_info['uid']
+        appkey = token_info['appkey']
         account = db.session.query(Account)\
                   .filter(Account.uid==uid)\
                   .filter(Account.provider=='weibo').first()
-        user_info = get_user_info(access_token, uid)
+        user_info = get_user_info(access_token, uid, appkey)
         username = user_info['screen_name']
 
         if not account: # if this account not found in db create it and its user
@@ -220,7 +223,7 @@ def apimessages():
     if not src_user_id:
         src_user_id = request.form.get('src_user_id')
     if not src_user_id:
-        src_user_id = session.get('src_user_id')
+        src_user_id = session.get('user_id')
     if not src_user_id:
         raise InvalidParam('no src_user_id')
     # dev end
@@ -251,6 +254,7 @@ def apimessages():
             raise InvalidParam('limit or offset is invalid')
 
         try:
+            print request.args
             user_id = int(request.args.get('user_id'))
         except:
             raise InvalidParam('user_id is invalid')
@@ -379,7 +383,7 @@ def apigreetings():
     if not src_user_id:
         src_user_id = request.form.get('src_user_id')
     if not src_user_id:
-        src_user_id = session.get('src_user_id')
+        src_user_id = session.get('user_id')
     if not src_user_id:
         raise InvalidParam('no src_user_id')
     # dev end

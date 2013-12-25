@@ -3,7 +3,6 @@ import urllib2
 import urllib
 import json
 import datetime
-from constants import APPKEY
 
 def sqlnow():
     return time.strftime('%Y-%m-%d %H:%M:%S')
@@ -14,7 +13,7 @@ def unix_time(dt):
     return delta.total_seconds()
 
 def totimestamp(dt):
-    return unix_time(dt) * 1000
+    return int(unix_time(dt)) * 1000
 
 class APIError(StandardError):
     '''
@@ -78,8 +77,8 @@ def get_token_info(access_token):
     data = urllib.urlencode({'access_token': access_token})
     return _post_weibo_api_call(url, data=data)
 
-def get_user_info(access_token, uid):
+def get_user_info(access_token, uid, appkey):
     url = 'https://api.weibo.com/2/users/show.json'
-    data = urllib.urlencode({'access_token': access_token, 'uid': uid, 'source': APPKEY})
+    data = urllib.urlencode({'access_token': access_token, 'uid': uid, 'source':appkey})
     return _get_weibo_api_call(url, data=data)
 
