@@ -38,6 +38,7 @@ def require_auth(f):
         user_id = session.get('user_id')
         if not user_id:
             raise NoAccess('not login')
+        return f(*args, **kvargs)
     return decorated
 
 #======================================================================
