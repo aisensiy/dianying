@@ -37,11 +37,7 @@ def require_auth(f):
     def decorated(*args, **kvargs):
         user_id = session.get('user_id')
         if not user_id:
-            return jsonify({
-                'status': 'fail',
-                'message': 'not login'
-            })
-        return f(*args, **kvargs)
+            raise NoAccess('not login')
     return decorated
 
 #======================================================================
@@ -52,7 +48,6 @@ def index():
     resp = make_response(file('README.md').read(), 200)
     resp.headers['Content-Type'] = 'text/plain; charset=utf-8'
     return resp
-
 
 @app.route('/auth/login', methods=['POST'])
 @crossdomain(origin='*')
