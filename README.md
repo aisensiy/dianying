@@ -181,8 +181,7 @@ http code: 400
 ### parameters:
 
 * user_id: int
-* limit: int
-* offset: int
+* lastid: int, default: 0
 
 ### return:
 
@@ -242,7 +241,7 @@ http code: 400
 
 ### parameters:
 
-* lastid: 返回时间戳大于 `lastid` 的好友。
+* lastid: 返回时间戳大于 `lastid` 的好友, default: 0。
 
 ### return
 

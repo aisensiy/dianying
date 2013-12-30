@@ -134,14 +134,15 @@ def post_message(src_user_id, dst_user_id, content):
     db.session.add(message)
     db.session.commit()
 
-def get_messages(uid1, uid2, limit, offset):
+def get_messages(uid1, uid2, lastid):
     rows = db.session\
             .query(Message.id, Message.content, Message.created_at, Account.uid)\
             .join(Account, Account.user_id == Message.src_user_id)\
+            .filter(Message.id > lastid)\
             .filter(Account.provider == 'weibo')\
             .filter(Message.src_user_id.in_([uid1, uid2]))\
             .filter(Message.dst_user_id.in_([uid1, uid2]))\
-            .order_by(Message.id.desc()).offset(offset).limit(limit)
+            .order_by(Message.id.desc()).all()
     items = [dict(zip(['id', 'content', 'created_at', 'uid'], [id, content, totimestamp(created_at), uid]))
             for id, content, created_at, uid in rows]
     items.reverse()
@@ -181,10 +182,9 @@ def apimessages():
         })
     else:
         try:
-            limit = int(request.args.get('limit', 10))
-            offset = int(request.args.get('offset', 0))
+            lastid = int(request.args.get('lastid', 0))
         except:
-            raise InvalidParam('limit or offset is invalid')
+            raise InvalidParam('invalid lastid')
 
         try:
             print request.args
@@ -192,7 +192,7 @@ def apimessages():
         except:
             raise InvalidParam('user_id is invalid')
 
-        items = get_messages(src_user_id, user_id, limit, offset)
+        items = get_messages(src_user_id, user_id, lastid)
         return jsonify({
             "status": "success",
             "data": {
