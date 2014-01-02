@@ -25,7 +25,6 @@ class User(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     registered_at = db.Column(db.DateTime)
     accounts = db.relationship('Account', backref='user', lazy='dynamic')
-    friends = db.relationship('Friend', foreign_keys='Friend.user_id')
     is_registered = db.Column(db.Boolean, default=False)
 
 class Message(db.Model):
@@ -60,14 +59,9 @@ class Greeting(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     src_user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     dst_user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    is_friend = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-class Friend(db.Model):
-    __tablename__ = 'friends'
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    friend_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    is_friend_at = db.Column(db.DateTime, default=None)
 
 if __name__ == '__main__':
     manager.run()

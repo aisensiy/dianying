@@ -272,23 +272,25 @@ http code: 400
 
 ### return
 
-返回已经打过招呼的 uid 列表
+返回已经打过招呼的 uid 列表，如果已经是好友关系，那么参数 `is_friend` == `true`
 
 ```
 {
   "data": {
     "items": [
       {
-        "lastid": 5,
+        "id": 5,
         "created_at": 1387348804000,
         "uid": "123",
-        "user_id": 5
+        "user_id": 5,
+        "is_friend": true
       },
       {
-        "lastid": 6,
+        "id": 6,
         "created_at": 1387348812000,
         "uid": "1234609293",
-        "user_id": 6
+        "user_id": 6,
+        "is_friend": null
       }
     ]
   },

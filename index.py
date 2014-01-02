@@ -8,7 +8,7 @@ from constants import *
 import json
 from helper import *
 from exception import *
-from model import User, Message, Movie, db, Account, Greeting, Friend
+from model import User, Message, Movie, db, Account, Greeting
 from functools import wraps
 from datetime import datetime
 from better_session import ItsdangerousSessionInterface
@@ -64,13 +64,22 @@ def authlogin():
         raise InvalidParam('invalid access_token', status_code=400)
 
     try:
-        token_info = get_token_info(access_token)
+        if os.environ.get('DEBUG', None):
+            token_info = {
+                'uid': '1313608362',
+                'appkey': '123'
+            }
+        else:
+            token_info = get_token_info(access_token)
         uid = token_info['uid']
         appkey = token_info['appkey']
         account = db.session.query(Account)\
                   .filter(Account.uid==uid)\
                   .filter(Account.provider=='weibo').first()
-        user_info = get_user_info(access_token, uid, appkey)
+        if os.environ.get('DEBUG', None):
+            user_info = get_user_info(access_token, uid, appkey)
+        else:
+            user_info = {'screen_name': 'aisensiy'}
         username = user_info['screen_name']
 
         if not account: # if this account not found in db create it and its user
@@ -220,10 +229,11 @@ def apifriends():
     from_table = aliased(Greeting)
     to_table = aliased(Greeting)
 
-    friends = db.session.query(Friend.id, Friend.friend_id, Account.uid, Account.provider, Friend.created_at)\
-                        .join(Account, Account.user_id == Friend.friend_id)\
-                        .filter(Friend.user_id == src_user_id)\
-                        .filter(Friend.id > lastid).all()
+    friends = db.session.query(Greeting.id, Greeting.dst_user_id, Account.uid, Account.provider, Greeting.created_at)\
+                        .join(Account, Account.user_id == Greeting.dst_user_id)\
+                        .filter(Greeting.src_user_id == src_user_id)\
+                        .filter(Greeting.is_friend == True)\
+                        .filter(Greeting.id > lastid).all()
 
     return jsonify({
         "status": "success",
@@ -267,8 +277,12 @@ def post_greeting(request, db, src_user_id):
                     .filter(Greeting.dst_user_id==src_user_id).first()
 
     if back_greeting:
-        db.session.add(Friend(user_id=account.user_id, friend_id=src_user_id))
-        db.session.add(Friend(user_id=src_user_id, friend_id=account.user_id))
+        back_greeting.is_friend = True
+        back_greeting.is_friend_at = sqlnow()
+        greeting.is_friend = True
+        greeting.is_friend_at = sqlnow()
+        db.session.add(greeting)
+        db.session.add(back_greeting)
         db.session.commit()
 
         return jsonify({
@@ -293,16 +307,20 @@ def get_greeting(request, db, src_user_id):
     except:
         raise InvalidParam('invalid lastid')
 
-    rows = db.session.query(Account.uid, Greeting.id, Greeting.created_at, Account.user_id)\
-           .join(Greeting, Greeting.dst_user_id==Account.user_id)\
-           .filter(Greeting.src_user_id==src_user_id)\
-           .filter(Greeting.id > lastid).all()
+    rows = db.session.query(
+            Account.uid, Greeting.id, Greeting.created_at, Account.user_id, Greeting.is_friend)\
+            .join(Greeting, Greeting.dst_user_id==Account.user_id)\
+            .filter(Greeting.src_user_id==src_user_id)\
+            .filter(Greeting.id > lastid)\
+            .order_by(Greeting.id).all()
 
     return jsonify({
         'status': 'success',
         'data': {
-            'items': [dict(zip(['uid', 'id', 'created_at', 'user_id'], [uid, id, totimestamp(created_at), user_id]))
-                for uid, id, created_at, user_id in rows]
+            'items': [dict(zip(
+                ['uid', 'id', 'created_at', 'user_id', 'is_friend'],
+                [uid, id, totimestamp(created_at), user_id, is_friend]))
+                for uid, id, created_at, user_id, is_friend in rows]
         }
     })
 
