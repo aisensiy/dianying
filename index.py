@@ -312,7 +312,8 @@ def get_greeting(request, db, src_user_id):
             .join(Greeting, Greeting.dst_user_id==Account.user_id)\
             .filter(Greeting.src_user_id==src_user_id)\
             .filter(Greeting.id > lastid)\
-            .order_by(Greeting.id).all()
+            .order_by(Greeting.is_friend.desc(), Greeting.created_at.desc(), Greeting.is_friend_at.desc())\
+            .all()
 
     return jsonify({
         'status': 'success',

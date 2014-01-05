@@ -272,7 +272,8 @@ http code: 400
 
 ### return
 
-返回已经打过招呼的 uid 列表，如果已经是好友关系，那么参数 `is_friend` == `true`
+返回已经打过招呼的 uid 列表，如果已经是好友关系，那么参数 `is_friend` == `true`。
+排序按照 is_friend desc, created_at desc
 
 ```
 {
