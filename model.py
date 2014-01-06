@@ -34,6 +34,7 @@ class Message(db.Model):
     dst_user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     content = db.Column(db.String(255))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    read_at = db.Column(db.DateTime, default=None)
 
 class Movie(db.Model):
     __tablename__ = 'movies'
