@@ -3,8 +3,11 @@ Go to github for this [README](https://github.com/aisensiy/dianying/blob/master/
 ## APIS
 
 * GET   /api/movies/(coming|playing)
+* GET   /api/unread_messages -- require login
 * GET   /api/messages -- require login
 * POST  /api/messages -- require login
+* GET   /api/last_read -- require login
+* POST  /api/last_read -- require login
 * GET   /api/friends -- require login
 * GET   /api/greetings -- require login
 * POST  /api/greetings -- require login
@@ -176,6 +179,44 @@ http code: 400
 }
 ```
 
+## GET /api/unread_messages
+
+返回当前用户所有没有读取的信息
+
+### parameters:
+
+no parameter
+
+### return:
+
+```
+{
+  "data": {
+    "items": [
+      {
+        "uid": "123",
+        "content": "test",
+        "created_at": 1387348724306
+        "id": 7
+      },
+      {
+        "uid": "123",
+        "content": "test",
+        "created_at": 1387348724306
+        "id": 8
+      },
+      {
+        "uid": "471231231",
+        "content": "test",
+        "created_at": 1387348724306
+        "id": 9
+      }
+    ]
+  },
+  "status": "success"
+}
+```
+
 ## GET /api/messages
 
 ### parameters:
@@ -230,6 +271,57 @@ http code: 400
     "dst_user_id": 1,
     "content": "test",
     "created_at": 1387348804000
+  },
+  "status": "success"
+}
+```
+
+## GET /api/last_read
+
+获取当前用户上次最后获取消息的最大 id
+
+### parameters:
+
+无
+
+### returns:
+
+```
+{
+  "data" {
+    "items": [
+      {
+        "uid": "1",
+        "user_id": "3",
+        "lastid": 10
+      },
+      {
+        "uid": "2",
+        "user_id": "4",
+        "lastid": 18
+      }
+    ]
+  },
+  "status": "success"
+}
+```
+
+## POST /api/last_read
+
+设置用户最后查看的用户消息的最大 id
+
+### parameters:
+
+* user_id: int
+* lastid: int
+
+### returns:
+
+```
+{
+  "data": {
+    "user_id": "1",
+    "lastid": "10"
   },
   "status": "success"
 }

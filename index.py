@@ -8,7 +8,7 @@ from constants import *
 import json
 from helper import *
 from exception import *
-from model import User, Message, Movie, db, Account, Greeting
+from model import User, Message, Movie, db, Account, Greeting, LastRead
 from functools import wraps
 from datetime import datetime
 from better_session import ItsdangerousSessionInterface
@@ -343,6 +343,99 @@ def apigreetings():
         return post_greeting(request, db, src_user_id)
     else:
         return get_greeting(request, db, src_user_id)
+
+@app.route('/api/unread_messages', methods=['GET'])
+@crossdomain(origin='*')
+@require_auth
+def apiunread():
+    # this is for dev
+    src_user_id = request.args.get('src_user_id')
+    if not src_user_id:
+        src_user_id = request.form.get('src_user_id')
+    if not src_user_id:
+        src_user_id = session.get('user_id')
+    if not src_user_id:
+        raise InvalidParam('no src_user_id')
+    # dev end
+
+    rows = db.session\
+            .query(Message.id, Message.content, Message.created_at, Account.uid)\
+            .join(Account, Account.user_id == Message.src_user_id)\
+            .filter(Account.provider == 'weibo')\
+            .filter(Message.read_at == None)\
+            .filter(Message.dst_user_id == src_user_id)\
+            .order_by(Message.id.desc()).all()
+    items = [dict(zip(['id', 'content', 'created_at', 'uid'], [id, content, totimestamp(created_at), uid]))
+            for id, content, created_at, uid in rows]
+    items.reverse()
+    return jsonify({
+        "status": "success",
+        "data": {
+            "items": items
+        }
+    })
+
+def getlastid(owner_id):
+    """docstring for getlastid"""
+    rows = db.session.query(LastRead.user_id, LastRead.lastid)\
+            .filter(LastRead.owner_id == owner_id)
+    items = [dict(zip(['user_id', 'lastid'], [user_id, lastid]))
+            for user_id, lastid in rows]
+    return jsonify({
+        'status': 'success',
+        'data': items
+    })
+
+def postlastid(user_id, owner_id, lastid):
+    item = db.session.query(LastRead)\
+            .filter(LastRead.owner_id == owner_id)\
+            .filter(LastRead.user_id == user_id).first()
+
+    if not item:
+        item = LastRead(owner_id=owner_id, user_id=user_id, lastid=lastid)
+    else:
+        item.lastid = lastid
+
+    db.session.add(item)
+    Message.query.filter_by(dst_user_id=owner_id, src_user_id=user_id, read_at=None)\
+            .filter(Message.id <= lastid)\
+            .update({'read_at': sqlnow()})
+    db.session.commit()
+
+
+    return jsonify({
+        'status': 'success',
+        'data': {
+            'user_id': user_id,
+            'lastid': lastid
+        }
+    })
+
+
+@app.route('/api/last_read', methods=['GET', 'POST'])
+@crossdomain(origin='*')
+@require_auth
+def apilast_read():
+    # this is for dev
+    src_user_id = request.args.get('src_user_id')
+    if not src_user_id:
+        src_user_id = request.form.get('src_user_id')
+    if not src_user_id:
+        src_user_id = session.get('user_id')
+    if not src_user_id:
+        raise InvalidParam('no src_user_id')
+    # dev end
+
+    if request.method == 'POST':
+        try:
+            lastid = int(request.form.get('lastid'))
+            user_id = int(request.form.get('user_id'))
+        except:
+            raise InvalidParam('invalid user_id or lastid')
+
+        return postlastid(user_id, src_user_id, lastid)
+    else:
+        return getlastid(src_user_id)
 
 
 if os.environ.get('SERVER_SOFTWARE', None):
