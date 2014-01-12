@@ -43,6 +43,17 @@ def require_auth(f):
 
 #======================================================================
 
+# for debug
+def set_src_user_id():
+    src_user_id = request.args.get('src_user_id')
+    if not src_user_id:
+        src_user_id = request.form.get('src_user_id')
+    if not src_user_id:
+        src_user_id = session.get('user_id')
+    if not src_user_id:
+        raise InvalidParam('no src_user_id')
+    return src_user_id
+
 @app.route('/')
 @crossdomain(origin='*')
 def index():
@@ -162,13 +173,7 @@ def get_messages(uid1, uid2, lastid):
 @require_auth
 def apimessages():
     # this is for dev
-    src_user_id = request.args.get('src_user_id')
-    if not src_user_id:
-        src_user_id = request.form.get('src_user_id')
-    if not src_user_id:
-        src_user_id = session.get('user_id')
-    if not src_user_id:
-        raise InvalidParam('no src_user_id')
+    src_user_id = set_src_user_id()
     # dev end
     if request.method == 'POST':
         try:
@@ -214,11 +219,7 @@ def apimessages():
 @require_auth
 def apifriends():
     # this is for dev
-    src_user_id = request.args.get('src_user_id')
-    if not src_user_id:
-        src_user_id = session.get('user_id')
-    if not src_user_id:
-        raise InvalidParam('no src_user_id')
+    src_user_id = set_src_user_id()
     # dev end
 
     try:
@@ -331,14 +332,9 @@ def get_greeting(request, db, src_user_id):
 @require_auth
 def apigreetings():
     # this is for dev
-    src_user_id = request.args.get('src_user_id')
-    if not src_user_id:
-        src_user_id = request.form.get('src_user_id')
-    if not src_user_id:
-        src_user_id = session.get('user_id')
-    if not src_user_id:
-        raise InvalidParam('no src_user_id')
+    src_user_id = set_src_user_id()
     # dev end
+
     if request.method == 'POST': # create greeting
         return post_greeting(request, db, src_user_id)
     else:
@@ -349,13 +345,7 @@ def apigreetings():
 @require_auth
 def apiunread():
     # this is for dev
-    src_user_id = request.args.get('src_user_id')
-    if not src_user_id:
-        src_user_id = request.form.get('src_user_id')
-    if not src_user_id:
-        src_user_id = session.get('user_id')
-    if not src_user_id:
-        raise InvalidParam('no src_user_id')
+    src_user_id = set_src_user_id()
     # dev end
 
     rows = db.session\
@@ -417,13 +407,7 @@ def postlastid(user_id, owner_id, lastid):
 @require_auth
 def apilast_read():
     # this is for dev
-    src_user_id = request.args.get('src_user_id')
-    if not src_user_id:
-        src_user_id = request.form.get('src_user_id')
-    if not src_user_id:
-        src_user_id = session.get('user_id')
-    if not src_user_id:
-        raise InvalidParam('no src_user_id')
+    src_user_id = set_src_user_id()
     # dev end
 
     if request.method == 'POST':
