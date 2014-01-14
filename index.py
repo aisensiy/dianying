@@ -201,7 +201,6 @@ def apimessages():
             raise InvalidParam('invalid lastid')
 
         try:
-            print request.args
             user_id = int(request.args.get('user_id'))
         except:
             raise InvalidParam('user_id is invalid')
@@ -367,27 +366,26 @@ def apiunread():
 
 def getlastid(owner_id):
     """docstring for getlastid"""
-    rows = db.session.query(LastRead.user_id, LastRead.lastid)\
-            .filter(LastRead.owner_id == owner_id)
-    items = [dict(zip(['user_id', 'lastid'], [user_id, lastid]))
-            for user_id, lastid in rows]
+    row = db.session.query(LastRead.lastid)\
+            .filter(LastRead.owner_id == owner_id).first()
+    lastid = row[0]
     return jsonify({
         'status': 'success',
-        'data': items
+        'data': lastid
     })
 
-def postlastid(user_id, owner_id, lastid):
+def postlastid(owner_id, lastid):
     item = db.session.query(LastRead)\
             .filter(LastRead.owner_id == owner_id)\
-            .filter(LastRead.user_id == user_id).first()
+            .first()
 
     if not item:
-        item = LastRead(owner_id=owner_id, user_id=user_id, lastid=lastid)
+        item = LastRead(owner_id=owner_id, lastid=lastid)
     else:
         item.lastid = lastid
 
     db.session.add(item)
-    Message.query.filter_by(dst_user_id=owner_id, src_user_id=user_id, read_at=None)\
+    Message.query.filter_by(dst_user_id=owner_id, read_at=None)\
             .filter(Message.id <= lastid)\
             .update({'read_at': sqlnow()})
     db.session.commit()
@@ -395,10 +393,7 @@ def postlastid(user_id, owner_id, lastid):
 
     return jsonify({
         'status': 'success',
-        'data': {
-            'user_id': user_id,
-            'lastid': lastid
-        }
+        'data': lastid
     })
 
 
@@ -413,11 +408,10 @@ def apilast_read():
     if request.method == 'POST':
         try:
             lastid = int(request.form.get('lastid'))
-            user_id = int(request.form.get('user_id'))
         except:
-            raise InvalidParam('invalid user_id or lastid')
+            raise InvalidParam('invalid lastid')
 
-        return postlastid(user_id, src_user_id, lastid)
+        return postlastid(src_user_id, lastid)
     else:
         return getlastid(src_user_id)
 

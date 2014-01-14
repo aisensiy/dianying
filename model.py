@@ -68,7 +68,6 @@ class LastRead(db.Model):
     __tablename__ = 'last_read'
     id = db.Column(db.Integer, primary_key=True)
     owner_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     lastid = db.Column(db.Integer)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
