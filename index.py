@@ -365,10 +365,12 @@ def apiunread():
     })
 
 def getlastid(owner_id):
-    """docstring for getlastid"""
     row = db.session.query(LastRead.lastid)\
             .filter(LastRead.owner_id == owner_id).first()
-    lastid = row[0]
+    if not row:
+        lastid = 0
+    else:
+        lastid = row[0]
     return jsonify({
         'status': 'success',
         'data': lastid
