@@ -1,1 +1,1 @@
-echo `date` >> /home/bae/log/cron.log
+echo "$(date)" >> /home/bae/log/cron.log
