@@ -195,18 +195,21 @@ no parameter
     "items": [
       {
         "uid": "123",
+        "user_id": 3,
         "content": "test",
         "created_at": 1387348724306
         "id": 7
       },
       {
         "uid": "123",
+        "user_id": 3,
         "content": "test",
         "created_at": 1387348724306
         "id": 8
       },
       {
         "uid": "471231231",
+        "user_id": 3,
         "content": "test",
         "created_at": 1387348724306
         "id": 9

@@ -348,14 +348,14 @@ def apiunread():
     # dev end
 
     rows = db.session\
-            .query(Message.id, Message.content, Message.created_at, Account.uid)\
+            .query(Message.id, Message.content, Message.created_at, Account.uid, Message.src_user_id)\
             .join(Account, Account.user_id == Message.src_user_id)\
             .filter(Account.provider == 'weibo')\
             .filter(Message.read_at == None)\
             .filter(Message.dst_user_id == src_user_id)\
             .order_by(Message.id.desc()).all()
-    items = [dict(zip(['id', 'content', 'created_at', 'uid'], [id, content, totimestamp(created_at), uid]))
-            for id, content, created_at, uid in rows]
+    items = [dict(zip(['id', 'content', 'created_at', 'uid', 'user_id'], [id, content, totimestamp(created_at), uid, src_user_id]))
+            for id, content, created_at, uid, src_user_id in rows]
     items.reverse()
     return jsonify({
         "status": "success",
