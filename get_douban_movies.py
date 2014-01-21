@@ -106,7 +106,7 @@ def fetch_playing(ids):
     url = DOUBAN_API_URL + str(id)
     resp = fetch(url)
     data = json.loads(resp)
-    print data['title']
+    print data['title'].encode('utf8')
     insert_movie(db, {
       "mid": id,
       "type": MOVIE_TYPE_PLAYING,
@@ -118,7 +118,7 @@ def fetch_coming(ids):
     url = DOUBAN_API_URL + str(id)
     resp = fetch(url)
     data = json.loads(resp)
-    print data['title']
+    print data['title'].encode('utf8')
     insert_movie(db, {
       "mid": id,
       "type": MOVIE_TYPE_COMING,
