@@ -143,6 +143,6 @@ def run(db):
 
 if __name__ == "__main__":
   from db import MySQL as DB
-  db = DB(dbconfig[ENV])
+  db = DB(dbconfig['production'])
   run(db)
 
