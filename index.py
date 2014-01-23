@@ -12,6 +12,7 @@ from model import User, Message, Movie, db, Account, Greeting, LastRead
 from functools import wraps
 from datetime import datetime
 from better_session import ItsdangerousSessionInterface
+import logging, sys
 
 app = Flask(__name__)
 app.secret_key = r"A0Zr98j/3yX R~XHH!jmN'LWX/,?RT"
@@ -31,6 +32,10 @@ def handle_error(error):
 @app.errorhandler(404)
 def not_found(error=None):
     return make_response(jsonify({ 'status': 'error', 'message': 'Not found' }), 404)
+
+@app.errorhandler(500)
+def internal_error(error=None):
+    return make_response(jsonify({ 'status': 'error', 'message': 'Internal Error' }), 500)
 
 def require_auth(f):
     @wraps(f)
@@ -420,6 +425,7 @@ def apilast_read():
 
 if os.environ.get('SERVER_SOFTWARE', None):
     from bae.core.wsgi import WSGIApplication
+    app.logger.addHandler(logging.StreamHandler(stream=sys.stderr))
     application = WSGIApplication(app)
 else:
     app.run(host='0.0.0.0', debug=True)
