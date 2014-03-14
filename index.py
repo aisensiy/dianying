@@ -93,9 +93,9 @@ def authlogin():
                   .filter(Account.uid==uid)\
                   .filter(Account.provider=='weibo').first()
         if os.environ.get('DEBUG', None):
-            user_info = get_user_info(access_token, uid, appkey)
-        else:
             user_info = {'screen_name': 'aisensiy'}
+        else:
+            user_info = get_user_info(access_token, uid, appkey)
         username = user_info['screen_name']
 
         if not account: # if this account not found in db create it and its user
